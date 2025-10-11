@@ -72,15 +72,12 @@ def parse_directory(
 
 def load_ignore_spec(file_path: str = ".gitignore") -> pathspec.PathSpec:
     file = pathlib.Path(file_path)
-    ignore_spec: pathspec.PathSpec
 
-    if not file.is_file:
-        ignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", [])
+    if not file.is_file():
+        return pathspec.PathSpec.from_lines("gitwildmatch", [])
 
     with open(file, "r", encoding="utf-8") as file:
-        ignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", file)
-
-    return ignore_spec
+        return pathspec.PathSpec.from_lines("gitwildmatch", file)
 
 
 def main() -> None:
