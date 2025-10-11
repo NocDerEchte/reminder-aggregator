@@ -21,16 +21,16 @@ jobs:
         version: '0.8.4'
 
     - name: Install requirements
-      run:
+      run: |
         uv venv
         uv pip install --upgrade pip
         uv pip install -r requirements.txt
         uv pip install pytest pytest-cov flake8
 
     - name: Run flake8
-      run:
+      run: |
         uv run flake8 --statistics --extend-exclude .venv
 
     - name: Run black
-      run:
+      run: |
         uv run black --check --config setup.cfg --diff .
