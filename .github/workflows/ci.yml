@@ -1,0 +1,36 @@
+---
+name: CI
+
+on:
+  pull_request:
+    branches: ['main']
+  push:
+    branches-ignore:  ['main']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: '0.8.4'
+
+    - name: Install requirements
+      run: |
+        uv venv
+        uv pip install --upgrade pip
+        uv pip install -r requirements.txt
+        uv pip install pytest pytest-cov flake8 black
+
+    - name: Run flake8
+      run: |
+        uv run flake8 --statistics --extend-exclude .venv
+
+    - name: Run black
+      run: |
+        uv run black --check --config setup.cfg --diff .
