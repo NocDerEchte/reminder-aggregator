@@ -20,9 +20,7 @@ def write_report(filename: str, data: Any) -> None:
         json.dump(report, file, indent=2)
 
 
-def parse_file(
-    path: pathlib.Path, path_root: pathlib.Path, pattern: re.Pattern
-) -> list[dict[str, Any]]:
+def parse_file(path: pathlib.Path, path_root: pathlib.Path, pattern: re.Pattern) -> list[dict[str, Any]]:
     # FIXME: Ensure that only comments count to matches.
     matches: list[dict[str, Any]] = []
 
