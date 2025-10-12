@@ -21,7 +21,9 @@ def _write_report(filename: str, data: Any) -> None:
         json.dump(report, file, indent=2)
 
 
-def _parse_file(path: pathlib.Path, path_root: pathlib.Path, pattern: re.Pattern) -> list[dict[str, Any]]:
+def _parse_file(
+    path: pathlib.Path, path_root: pathlib.Path, pattern: re.Pattern
+) -> list[dict[str, Any]]:
     # FIXME: Ensure that only comments count to matches.
     matches: list[dict[str, Any]] = []
 
@@ -81,18 +83,38 @@ def _load_ignore_spec(file_path: str) -> pathspec.PathSpec:
         return pathspec.PathSpec.from_lines("gitwildmatch", file)
 
 
-CONTEXT_SETTINGS = {
-    "max_content_width": os.get_terminal_size().columns - 10
-}
+CONTEXT_SETTINGS = {"max_content_width": os.get_terminal_size().columns - 10}
+
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 def cli():
     pass
 
+
 @cli.command("report", short_help="Generate a report")
-@click.option("--out-file", "-o", default="report.json", show_default=True, type=click.Path(), help=" Specify path where the report will be saved")
-@click.option("--format", "-f", default="json", show_default=True, help="Specify the format of the generated report")
-@click.option("--ignore-file", default=".gitignore", show_default=True, type=click.Path(exists=True), help="Specify ignore file to use")
+@click.option(
+    "--out-file",
+    "-o",
+    default="report.json",
+    show_default=True,
+    type=click.Path(),
+    help=" Specify path where the report will be saved",
+)
+@click.option(
+    "--format",
+    "-f",
+    default="json",
+    show_default=True,
+    type=click.Choice(["json"]),
+    help="Specify the format of the generated report",
+)
+@click.option(
+    "--ignore-file",
+    default=".gitignore",
+    show_default=True,
+    type=click.Path(exists=True),
+    help="Specify ignore file to use",
+)
 @click.argument("path", envvar="RA_SEARCH_DIR", default=".", type=click.Path())
 def report(path: str, out_file: str, format: str, ignore_file: str) -> None:
     """
