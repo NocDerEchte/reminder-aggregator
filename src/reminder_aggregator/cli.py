@@ -1,13 +1,14 @@
-import re
+import json
 import os
 import pathlib
-import pathspec
-import json
-import click
+import re
 from typing import Any, Counter
 
+import click
+import pathspec
 
-def _write_report(filename: str, data: Any) -> None:
+
+def _write_report(filename: str, data: list[dict[str, Any]]) -> None:
     counter = Counter(match["type"].upper() for match in data)
     summary = dict(counter)
     summary["total"] = sum(counter.values())
@@ -85,7 +86,7 @@ CONTEXT_SETTINGS = {"max_content_width": os.get_terminal_size().columns - 10}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-def cli():
+def cli() -> None:
     pass
 
 

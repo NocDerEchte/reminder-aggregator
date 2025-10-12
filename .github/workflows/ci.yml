@@ -23,15 +23,11 @@ jobs:
     - name: Install requirements
       run: |
         uv sync
-        uv add pytest pytest-cov flake8 black
+        uv add ruff
 
-    - name: Run flake8
+    - name: Run ruff
       run: |
-        uv run flake8 --statistics --extend-exclude .venv
-
-    - name: Run black
-      run: |
-        uv run black --diff .
+        uv run ruff check --show-fixes
 
   build:
     runs-on: ubuntu-latest
