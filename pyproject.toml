@@ -1,7 +1,7 @@
 [project]
 name = "reminder-aggregator"
 version = "0.1.0"
-description = "A simple cli application that aggregates codereminger tags like TODO, etc. in a report"
+description = "A simple cli application that aggregates codereminder tags like TODO, etc. in a report"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
