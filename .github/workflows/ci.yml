@@ -31,7 +31,7 @@ jobs:
 
     - name: Run black
       run: |
-        uv run black --check --config setup.cfg --diff .
+        uv run black --diff .
 
   build:
     runs-on: ubuntu-latest

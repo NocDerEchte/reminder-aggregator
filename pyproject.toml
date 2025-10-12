@@ -16,3 +16,9 @@ reminder-aggregator = "reminder_aggregator.__main__:cli"
 [build-system]
 requires = ["uv_build>=0.9.2,<0.10.0"]
 build-backend = "uv_build"
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.black]
+line-length = 120
