@@ -22,18 +22,16 @@ jobs:
 
     - name: Install requirements
       run: |
-        uv venv
-        uv pip install --upgrade pip
-        uv pip install -r requirements.txt
-        uv pip install pytest pytest-cov flake8 black
+        uv sync
+        uv add pytest pytest-cov flake8 black
 
     - name: Run flake8
       run: |
-        uv run flake8 --statistics --extend-exclude .venv
+        flake8 --statistics --extend-exclude .venv
 
     - name: Run black
       run: |
-        uv run black --check --config setup.cfg --diff .
+        black --check --config setup.cfg --diff .
 
   build:
     runs-on: ubuntu-latest
