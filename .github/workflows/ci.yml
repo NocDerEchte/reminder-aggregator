@@ -27,11 +27,11 @@ jobs:
 
     - name: Run flake8
       run: |
-        flake8 --statistics --extend-exclude .venv
+        uv run flake8 --statistics --extend-exclude .venv
 
     - name: Run black
       run: |
-        black --check --config setup.cfg --diff .
+        uv run black --check --config setup.cfg --diff .
 
   build:
     runs-on: ubuntu-latest
