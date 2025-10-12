@@ -1,24 +1,20 @@
-FROM python:3.13-slim
+FROM ghcr.io/astral-sh/uv:python3.13-alpine
 
 LABEL description="Code-Reminder aggregation tool"
 
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-
 WORKDIR /app
 
-COPY requirements.txt .
+RUN addgroup -S app && \
+    adduser -S -G app app
 
-RUN pip install --no-cache-dir -r requirements.txt
+ENV PATH=/app/.venv/bin:$PATH
 
-RUN groupadd --system app && \
-    useradd --system --create-home --gid app app
+COPY . /app
 
-COPY reminder_aggregator.py .
+RUN chown -R app:app /app
 
-RUN chown -R app:app /app && \
-    chmod -R 755 /app
+USER app
 
-USER app:app
+RUN uv sync --locked --no-dev
 
-ENTRYPOINT [ "python3", "./reminder_aggregator.py" ]
+ENTRYPOINT ["reminder-aggregator", "report"]
