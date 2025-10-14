@@ -4,11 +4,9 @@ name: CI
 on:
   pull_request:
     branches: ['main']
-  push:
-    branches-ignore:  ['main']
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,13 +19,13 @@ jobs:
         version: '0.8.4'
 
     - name: Install requirements
-      run: |
-        uv sync
-        uv add ruff
+      run: uv sync
 
-    - name: Run ruff
-      run: |
-        uv run ruff check --show-fixes
+    - name: Run ruff check
+      run: uv run ruff check --show-fixes
+
+    - name: Run ruff format
+      run: uv run ruff format --diff
 
   build:
     runs-on: ubuntu-latest

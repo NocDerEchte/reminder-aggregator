@@ -35,3 +35,8 @@ select = [
     "RUF", # ruff-specific rules
 ]
 fixable = ["ALL"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.0",
+]
