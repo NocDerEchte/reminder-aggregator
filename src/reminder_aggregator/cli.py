@@ -139,5 +139,6 @@ def report(path: str, out_file: str, format: str, ignore_file: str) -> None:
 
     _write_report(output_path, matches)
 
+
 if __name__ == "__main__":
     cli()
