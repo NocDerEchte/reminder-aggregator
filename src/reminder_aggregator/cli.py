@@ -138,3 +138,6 @@ def report(path: str, out_file: str, format: str, ignore_file: str) -> None:
     matches = _parse_directory(search_directory, path_root, re_match, ignore_spec)
 
     _write_report(output_path, matches)
+
+if __name__ == "__main__":
+    cli()
