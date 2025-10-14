@@ -1,7 +1,7 @@
 ---
 name: CI
 
-on:
+"on":
   pull_request:
     branches: ['main']
 
@@ -27,7 +27,7 @@ jobs:
     - name: Run ruff format
       run: uv run ruff format --diff
 
-  build:
+  build-docker:
     runs-on: ubuntu-latest
 
     steps:
@@ -39,3 +39,18 @@ jobs:
 
     - name: Build image
       run: docker build -t ${{secrets.DOCKER_USERNAME}}/reminder-aggregator:latest .
+
+  build-package:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: '0.8.4'
+
+    - name: Build package
+      run: uv build --no-sources --no-progress
