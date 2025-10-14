@@ -43,9 +43,6 @@ jobs:
     needs: build-package
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
       - name: Download atifacts
         uses: actions/download-artifact@v4
         with:
@@ -60,7 +57,7 @@ jobs:
       - name: Publish to Test-PyPI
         run: uv publish --trusted-publishing
         env:
-          UV_PUBLISH_INDEX: testpypi
+          UV_PUBLISH_URL: https://test.pypi.org/legacy/
 
   release:
     runs-on: ubuntu-latest
@@ -72,9 +69,6 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
       - name: Download atifacts
         uses: actions/download-artifact@v4
         with:
@@ -89,7 +83,7 @@ jobs:
       - name: Publish to PyPI
         run: uv publish --trusted-publishing
         env:
-          UV_PUBLISH_INDEX: pypi
+          UV_PUBLISH_URL: https://pypi.org/
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
