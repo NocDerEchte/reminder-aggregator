@@ -43,6 +43,9 @@ jobs:
     needs: build-package
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - name: Download atifacts
         uses: actions/download-artifact@v4
         with:
@@ -69,6 +72,9 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - name: Download atifacts
         uses: actions/download-artifact@v4
         with:
