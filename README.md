@@ -24,3 +24,9 @@ reminder_aggregator --help
 
 - Filter to check whether a reminder-tag is inside a comment (currently causes false positives)
 - Support for multiple output formats
+
+## License
+
+GNU General Public License v3.0 or later
+
+See [LICENSE](./LICENSE) to see the full text.
