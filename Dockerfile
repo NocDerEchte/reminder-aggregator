@@ -7,6 +7,8 @@ WORKDIR /app
 RUN addgroup -S app && \
     adduser -S -G app app
 
+RUN apk add --no-cache git
+
 ENV PATH=/app/.venv/bin:$PATH
 
 COPY . /app

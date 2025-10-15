@@ -20,6 +20,7 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
 fallback-version = "0.0.0"
+style = "semver"
 
 [tool.ruff]
 line-length = 120
