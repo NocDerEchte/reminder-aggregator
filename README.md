@@ -4,7 +4,7 @@ A simple python tool that scans files in a directory for common reminder tags su
 
 ## Requirements
 
-- Python 3.13+
+- Python 3.10+
 
 ## Installation
 
