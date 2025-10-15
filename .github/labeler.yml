@@ -1,7 +1,0 @@
----
-documentation:
-  - changed-files:
-      - any-glob-to-any-file: "**/*.md"
-
-release:
-  - head-branch: "^v[0-9]+.[0-9]+.[0-9]+$"
