@@ -1,6 +1,7 @@
 name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
 sort-direction: ascending
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
 exclude-labels:
   - skip-changelog
 
@@ -24,15 +25,24 @@ categories:
     labels:
       - breaking-change
 
-template: |
-  ## Changes
+  - title: "Features"
+    labels:
+      - feature
 
+  - title: "Bug Fixes"
+    labels:
+      - fix
+
+  - title: "Maintenance"
+    labels:
+      - chore
+      - documentation
+
+template: |
   $CHANGES
 
 ## Autolabeler configuration
 autolabeler:
-  - label: fix
-
   - label: breaking-change
     body:
       - "/^BREAKING CHANGE/i"
@@ -50,3 +60,7 @@ autolabeler:
       - "*.md"
     title:
       - /^(doc|docs)/i
+
+  - label: fix
+    title:
+      - /^(fix|bug|hotfix)/i
