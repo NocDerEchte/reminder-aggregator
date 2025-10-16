@@ -84,13 +84,7 @@ def _load_ignore_spec(file_path: str) -> pathspec.PathSpec:
 
 CONTEXT_SETTINGS = {"max_content_width": os.get_terminal_size().columns - 10}
 
-
-@click.group(context_settings=CONTEXT_SETTINGS)
-def cli() -> None:
-    pass
-
-
-@cli.command("report", short_help="Generate a report")
+@click.command("reminder-aggregator", short_help="Generate a report", context_settings=CONTEXT_SETTINGS)
 @click.option(
     "--out-file",
     "-o",
@@ -115,7 +109,7 @@ def cli() -> None:
     help="Specify ignore file to use",
 )
 @click.argument("path", envvar="RA_SEARCH_DIR", default=".", type=click.Path())
-def report(path: str, out_file: str, format: str, ignore_file: str) -> None:
+def cli(path: str, out_file: str, format: str, ignore_file: str) -> None:
     """
     \b
     positional arguments:
