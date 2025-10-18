@@ -2,6 +2,19 @@
 name = "reminder-aggregator"
 description = "A simple Python tool that scans files for common reminder tags like TODO and FIXME to generate a report from them."
 readme = "README.md"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Utilities",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
 requires-python = ">=3.10"
 dependencies = [
     "click>=8.3.0",
