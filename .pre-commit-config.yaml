@@ -11,6 +11,8 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: trailing-whitespace
+        exclude_types:
+          - markdown
       - id: end-of-file-fixer
       - id: debug-statements
 
