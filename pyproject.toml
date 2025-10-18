@@ -1,6 +1,6 @@
 [project]
 name = "reminder-aggregator"
-description = "A simple cli application that aggregates codereminder tags like TODO, etc. in a report"
+description = "A simple Python tool that scans files for common reminder tags like TODO and FIXME to generate a report from them."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
