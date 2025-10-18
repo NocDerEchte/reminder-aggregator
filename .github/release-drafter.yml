@@ -11,7 +11,6 @@ version-resolver:
       - breaking-change
   minor:
     labels:
-      - breaking-change
       - feature
   patch:
     labels:
@@ -39,7 +38,11 @@ categories:
       - documentation
 
 template: |
+  # What's Changed
+
   $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
 ## Autolabeler configuration
 autolabeler:
