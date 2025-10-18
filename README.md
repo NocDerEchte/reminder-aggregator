@@ -1,6 +1,14 @@
+<div align="center">
+
 # Reminder Aggregator
 
-A simple python tool that scans files in a directory for common reminder tags such as `TODO`, `FIXME`, etc. and generates a report from them.
+**A simple Python tool that scans files for common reminder tags like TODO and FIXME to generate a report from them.**
+
+[![PyPI - Version](https://img.shields.io/pypi/v/reminder-aggregator)](https://pypi.org/project/reminder-aggregator/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/reminder-aggregator)](https://pypi.org/project/reminder-aggregator/)
+![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)
+
+</div>
 
 ## Requirements
 
@@ -8,22 +16,54 @@ A simple python tool that scans files in a directory for common reminder tags su
 
 ## Installation
 
-With [uv](https://docs.astral.sh/uv/getting-started/installation/) (recommended):
+From PyPI (recommended):
 
 ```bash
+pip install reminder-aggregator
+```
+
+From source with [uv](https://docs.astral.sh/uv/getting-started/installation/):
+
+```bash
+git clone https://github.com/NocDerEchte/reminder-aggregator.git
+cd reminder-aggregator
+
 uv sync
+uv run reminder-aggregator --help
 ```
 
 ## Usage
 
+Scan current directory:
+
 ```bash
-reminder_aggregator --help
+reminder-aggregator
 ```
 
-## Future Changes
+Scan specific directory:
 
-- Filter to check whether a reminder-tag is inside a comment (currently causes false positives)
-- Support for multiple output formats
+```bash
+reminder-aggregator /path/to/directory
+```
+
+Specify output file:
+
+```bash
+reminder-aggregator --out-file /path/to/report.json
+```
+
+Show all available options:
+
+```bash
+reminder-aggregator --help
+```
+
+## Roadmap
+
+- [ ] Filter to check whether a reminder-tag is inside a comment (currently causes false positives)
+- [ ] Support for multiple output formats
+  - [ ] junitxml
+  - [ ] raw/stdout
 
 ## License
 
