@@ -22,7 +22,7 @@ CONTEXT_SETTINGS = {"max_content_width": os.get_terminal_size().columns - 10}
     "-f",
     default="json",
     show_default=True,
-    type=click.Choice(["json"]),
+    type=click.Choice(["json", "codeclimate"]),
     help="Specify the format of the generated report",
 )
 @click.option(

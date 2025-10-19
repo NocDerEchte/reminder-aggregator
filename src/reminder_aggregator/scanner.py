@@ -1,5 +1,6 @@
 import json
 import re
+from hashlib import md5
 from pathlib import Path
 from re import Pattern
 from typing import Any, Counter
@@ -39,6 +40,8 @@ class Scanner:
         match self.out_format:
             case "json":
                 self._create_json_report(self.out_file)
+            case "codeclimate":
+                self._create_codeclimate_report(self.out_file)
             case _:
                 return
 
@@ -51,6 +54,37 @@ class Scanner:
             "summary": summary,
             "details": self.matches,
         }
+
+        with open(out_file, "w", encoding="utf-8") as file:
+            json.dump(report, file, indent=2)
+
+    def _create_codeclimate_report(self, out_file: Path) -> None:
+        report: list[dict[str, Any]] = []
+
+        for match in self.matches:
+            comment_text = match["comment"].split(match["type"], 1)[-1].lstrip(":").strip()
+            description = f"Usage of {match['type']} tag"
+            fingetprint = md5(f"{match['file']}:{match['line']}:{match['type']}".encode()).hexdigest()
+
+            report.append(
+                {
+                    "type": "issue",
+                    "check_name": match["type"].upper(),
+                    "description": description,
+                    "content": {
+                        "body": comment_text or match["comment"],
+                    },
+                    "categories": ["Style"],
+                    "location": {
+                        "path": match["file"],
+                        "lines": {
+                            "begin": match["line"],
+                        },
+                    },
+                    "severity": "info",
+                    "fingerprint": fingetprint,
+                }
+            )
 
         with open(out_file, "w", encoding="utf-8") as file:
             json.dump(report, file, indent=2)
