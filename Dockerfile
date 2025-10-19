@@ -19,4 +19,4 @@ USER app
 
 RUN uv sync --locked --no-dev
 
-ENTRYPOINT ["reminder-aggregator", "report"]
+ENTRYPOINT ["reminder-aggregator"]
