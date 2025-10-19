@@ -58,6 +58,14 @@ Show all available options:
 reminder-aggregator --help
 ```
 
+## Docker Usage
+
+Run the containerized version by mounting your project directory:
+
+```bash
+docker run --rm -it -v "$(pwd):/work" nocderechte/reminder-aggregator:latest
+```
+
 ## Roadmap
 
 - [ ] Filter to check whether a reminder-tag is inside a comment (currently causes false positives)
