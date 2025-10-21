@@ -15,7 +15,12 @@ class Scanner:
         self.out_format: str = out_format
         self.ignore_spec: GitIgnoreSpec = self._load_ignorespec(ignore_file)
 
-    MATCH_PATTERN: Pattern = re.compile(r"(TODO|FIXME|HACK|OPTIMIZE|REVIEW)")
+        self.BASE_PATTERN: str = r"[\:\ ]*(TODO|FIXME|HACK|OPTIMIZE|REVIEW).*"
+
+        self.comment_patterns: dict[Pattern, Pattern] = {
+            re.compile(r".*\.(ya?ml|py|json|toml)$"): re.compile(f"#+{self.BASE_PATTERN}"),
+            re.compile(r".*\.html?$"): re.compile(f"(<!--){self.BASE_PATTERN}(-->)"),
+        }
 
     def scan(self) -> None:
         matches: list[dict[str, Any]] = []
@@ -90,7 +95,6 @@ class Scanner:
             json.dump(report, file, indent=2)
 
     def _parse_file(self, file_path: Path) -> list[dict[str, Any]]:
-        # FIXME: Ensure that only comments count to matches.
         matches: list[dict[str, Any]] = []
         cwd: Path = Path.cwd()
 
@@ -101,11 +105,16 @@ class Scanner:
         else:
             display_path: Path = file_path
 
+        comment_pattern: Pattern | None = self._get_comment_pattern(file_path)
+
+        if comment_pattern is None:
+            return matches
+
         try:
             for line_number, line in enumerate(open(file_path)):
                 line = line.strip()
 
-                if match := re.search(self.MATCH_PATTERN, line):
+                if match := re.search(comment_pattern, line):
                     matches.append(
                         {
                             "type": match.group(1),
@@ -119,6 +128,13 @@ class Scanner:
             print(f"Error reading {file_path}")
 
         return matches
+
+    def _get_comment_pattern(self, file_path: Path) -> Pattern | None:
+        for file_pattern, comment_pattern in self.comment_patterns.items():
+            if file_pattern.match(str(file_path)):
+                return comment_pattern
+
+        return None
 
     def _load_ignorespec(self, ignore_file: Path | None = None) -> GitIgnoreSpec:
         DEFAULT_PATTERNS = [
