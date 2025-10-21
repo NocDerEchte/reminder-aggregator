@@ -5,7 +5,15 @@ import click
 
 from reminder_aggregator import scanner
 
-CONTEXT_SETTINGS = {"max_content_width": os.get_terminal_size().columns - 10}
+
+def _get_terminal_width() -> int:
+    try:
+        return os.get_terminal_size().columns - 10
+    except OSError:
+        return 80
+
+
+CONTEXT_SETTINGS = {"max_content_width": _get_terminal_width()}
 
 
 @click.command("reminder-aggregator", short_help="Generate a report", context_settings=CONTEXT_SETTINGS)
