@@ -10,7 +10,7 @@ COPY src/ src/
 
 RUN uv build --wheel
 
-FROM python:3.13-alpine AS runtime
+FROM python:3.14-alpine AS runtime
 
 LABEL description="Code-Reminder aggregation tool"
 
