@@ -20,8 +20,6 @@ CONTEXT_SETTINGS = {"max_content_width": _get_terminal_width()}
 @click.option(
     "--out-file",
     "-o",
-    default="report.json",
-    show_default=True,
     type=click.Path(),
     help=" Specify path where the report will be saved",
 )
@@ -41,7 +39,7 @@ CONTEXT_SETTINGS = {"max_content_width": _get_terminal_width()}
     help="Specify ignore file to use",
 )
 @click.argument("path", envvar="RA_SEARCH_DIR", default=".", type=click.Path())
-def cli(path: Path, out_file: Path, format: str, ignore_file: Path) -> None:
+def cli(path: Path, out_file: Path | None, format: str, ignore_file: Path) -> None:
     """
     \b
     positional arguments:
@@ -50,7 +48,10 @@ def cli(path: Path, out_file: Path, format: str, ignore_file: Path) -> None:
     # TODO: Add support for multiple output formats (junitxml, json, etc.)
 
     file_scanner = scanner.Scanner(
-        scan_dir=Path(path), out_file=Path(out_file), out_format=format, ignore_file=Path(ignore_file)
+        scan_dir=Path(path),
+        out_file=Path(out_file) if out_file else None,
+        out_format=format,
+        ignore_file=Path(ignore_file),
     )
 
     file_scanner.scan()

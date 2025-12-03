@@ -10,10 +10,20 @@ from pathspec import GitIgnoreSpec
 
 
 class Scanner:
-    def __init__(self, scan_dir: Path, out_file: Path, out_format: str, ignore_file: Path | None = None) -> None:
+    def __init__(self, scan_dir: Path, out_file: Path | None, out_format: str, ignore_file: Path | None = None) -> None:
         self.scan_dir: Path = scan_dir
-        self.out_file: Path = out_file
         self.out_format: str = out_format
+
+        if out_file is None:
+            extension_map = {
+                "json": "json",
+                "codeclimate": "json",
+                "junitxml": "xml",
+            }
+            self.out_file = Path(f"report.{extension_map[out_format]}")
+        else:
+            self.out_file = out_file
+
         self.ignore_spec: GitIgnoreSpec = self._load_ignorespec(ignore_file)
 
         self.BASE_PATTERN: str = r"[\:\ ]*(TODO|FIXME|HACK|OPTIMIZE|REVIEW).*"
