@@ -1,5 +1,6 @@
 import json
 import re
+import xml.etree.ElementTree as ET
 from hashlib import md5
 from pathlib import Path
 from re import Pattern
@@ -47,8 +48,27 @@ class Scanner:
                 self._create_json_report(self.out_file)
             case "codeclimate":
                 self._create_codeclimate_report(self.out_file)
+            case "junitxml":
+                self._create_junitxml_report(self.out_file)
             case _:
                 return
+
+    def _create_junitxml_report(self, out_file: Path) -> None:
+        testsuite = ET.Element("testsuite", name="ReminderAggregator", tests=str(len(self.matches)))
+
+        for match in self.matches:
+            testcase = ET.SubElement(testsuite, "testcase", classname=match["file"], name=f"Line {match['line']}")
+
+            failure = ET.SubElement(
+                testcase,
+                "failure",
+                message=f"Found {match['type']} tag",
+                type=match["type"],
+            )
+            failure.text = match["comment"]
+
+        tree = ET.ElementTree(testsuite)
+        tree.write(out_file, encoding="utf-8", xml_declaration=True)
 
     def _create_json_report(self, out_file: Path) -> None:
         counter = Counter(match["type"].upper() for match in self.matches)
