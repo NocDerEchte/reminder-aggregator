@@ -70,7 +70,7 @@ docker run --rm -v "$(pwd):/work" nocderechte/reminder-aggregator:latest
 
 - [x] Filter to check whether a reminder-tag is inside a comment (currently causes false positives)
 - [ ] Support for multiple output formats
-  - [ ] junitxml
+  - [x] junitxml
   - [ ] raw/stdout
   - [x] codeclimate
 
