@@ -19,7 +19,6 @@ requires-python = ">=3.10"
 dependencies = [
     "click>=8.3.0",
     "pathspec==0.12.1",
-    "pip==25.3",
 ]
 dynamic = ["version"]
 
