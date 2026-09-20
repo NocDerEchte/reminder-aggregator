@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 import mashumaro.codecs.json as json_codec
@@ -18,6 +18,7 @@ DEFAULT_REMINDER_TYPES: tuple[ReminderType, ...] = (
 class ReportConfig:
     format: ReportFormat = ReportFormat.JSON
     path: Path = Path("reminders.json")
+    stdout: bool = True
 
 
 @dataclass(frozen=True)
@@ -31,7 +32,7 @@ class ReminderConfig:
 class ReminderAggregatorConfig:
     reminder: ReminderConfig = field(default_factory=ReminderConfig)
     report: ReportConfig = field(default_factory=ReportConfig)
-    path: Path = Path("./")
+    scan_path: Path = Path("./")
 
 
 def _load_yaml_config(config_path: Path) -> ReminderAggregatorConfig:
@@ -82,7 +83,47 @@ def get_configured_reminder_types(config: ReminderAggregatorConfig) -> tuple[Rem
     if config.reminder.use_default:
         return DEFAULT_REMINDER_TYPES
 
-    if config.reminder.enabled:
-        return config.reminder.enabled
+    return tuple(type for type in config.reminder.enabled if type not in config.reminder.disabled)
 
-    return ()
+
+def override_config_options(
+    config: ReminderAggregatorConfig,
+    scan_path: Path | None = None,
+    reminder_use_default: bool | None = None,
+    reminder_enabled: tuple[ReminderType, ...] | None = (),
+    reminder_disabled: tuple[ReminderType, ...] | None = (),
+    report_format: ReportFormat | None = None,
+    report_path: Path | None = None,
+    report_stdout: bool | None = True,
+) -> ReminderAggregatorConfig:
+    config_scan_path = config.scan_path
+    config_reminder = config.reminder
+    config_report = config.report
+
+    if scan_path is not None:
+        config_scan_path = scan_path
+
+    if reminder_use_default is not None:
+        config_reminder = replace(config_reminder, use_default=reminder_use_default)
+
+    if reminder_enabled != ():
+        config_reminder = replace(config_reminder, enabled=reminder_enabled)
+
+    if reminder_disabled != ():
+        config_reminder = replace(config_reminder, disabled=reminder_disabled)
+
+    if report_format is not None:
+        config_report = replace(config_report, format=report_format)
+
+    if report_path is not None:
+        config_report = replace(config_report, path=report_path)
+
+    if report_stdout is not None:
+        config_report = replace(config_report, stdout=report_stdout)
+
+    return replace(
+        config,
+        scan_path=config_scan_path,
+        reminder=config_reminder,
+        report=config_report,
+    )
