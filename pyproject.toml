@@ -14,7 +14,7 @@ classifiers = [
   "Topic :: Utilities",
   "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "click>=8.3.0",
     "mashumaro[toml]>=3.22",
