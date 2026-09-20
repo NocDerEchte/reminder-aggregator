@@ -24,7 +24,6 @@ wheels/
 *.spec
 
 # IDE / Editor specific
-.vscode/
 .idea/
 *.swp
 *.swo
