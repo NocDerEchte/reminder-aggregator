@@ -18,7 +18,7 @@ class Scanner:
 
         enabled_reminder_types: tuple[ReminderType, ...] = get_configured_reminder_types(self.config)
 
-        for file_number, file in enumerate(self.config.path.rglob("*"), 1):
+        for file_number, file in enumerate(self.config.scan_path.rglob("*"), 1):
             print(
                 f"""Processed {file_number} files.""",
                 end="\r",
@@ -66,6 +66,9 @@ def _process_comment_block(
         start=comment_start_line,
     ):
         for finding_type, _ in finding_pattern.findall(line_content):
+            if finding_type == "":
+                continue
+
             findings.append(
                 Finding(
                     line=offset,
