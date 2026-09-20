@@ -2,6 +2,7 @@ import json
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from hashlib import md5
+from pathlib import Path
 from typing import Any
 
 from .types import Finding, ReportFormat
@@ -72,3 +73,7 @@ def generate_report(report_format: ReportFormat, findings: tuple[Finding, ...]) 
     report_function = REPORT_FORMAT_MAP.get(report_format, _generate_json_report)
 
     return report_function(findings)
+
+
+def write_report(content: str, path: Path) -> None:
+    path.write_text(content)
