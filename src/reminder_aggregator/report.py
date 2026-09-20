@@ -2,10 +2,41 @@ import json
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from hashlib import md5
+from itertools import groupby
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
-from .types import Finding, ReportFormat
+from .types import Finding, ReminderType, ReportFormat
+
+
+def _generate_table_report(findings: tuple[Finding, ...]) -> str:
+    output: list[str] = []
+
+    findings_by_file_path = groupby(findings, key=lambda f: f.file)
+
+    for file_path, finding in findings_by_file_path:
+        output.append(_generate_table_report_entry(file_path, finding))
+
+    return "\n".join(output)
+
+
+def _generate_table_report_entry(file_path: Path | str, findings: Iterator[Finding]) -> str:
+    table_entry: str = ""
+
+    entry_header: str = f"""
+{file_path}
+-------------------------------------------------------
+"""
+
+    table_entry = entry_header
+
+    for finding in findings:
+        finding_line: int = finding.line
+        finding_content: str = finding.content.replace("\n", "\t")
+        finding_type: ReminderType = finding.type
+
+        table_entry = table_entry + f"{finding_line:<3} {finding_type:<6} {finding_content}\n"
+    return table_entry
 
 
 def _generate_json_report(findings: tuple[Finding, ...]) -> str:
@@ -66,6 +97,7 @@ REPORT_FORMAT_MAP = {
     ReportFormat.JSON: _generate_json_report,
     ReportFormat.JUNITXML: _generate_junitxml_report,
     ReportFormat.CODECLIMATE: _generate_codeclimate_report,
+    ReportFormat.TABLE: _generate_table_report,
 }
 
 

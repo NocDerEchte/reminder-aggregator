@@ -15,6 +15,7 @@ class ReportFormat(StrEnum):
     JSON = "json"
     JUNITXML = "junitxml"
     CODECLIMATE = "codeclimate"
+    TABLE = "table"
 
 
 @dataclass(frozen=True)
