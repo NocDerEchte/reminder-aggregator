@@ -1,185 +1,131 @@
-import json
 import re
-import xml.etree.ElementTree as ET
-from hashlib import md5
 from pathlib import Path
-from re import Pattern
-from typing import Any, Counter
 
-from pathspec import GitIgnoreSpec
+from pygments.lexer import Lexer
+from pygments.lexers import get_lexer_for_filename
+from pygments.token import Comment
+
+from .config import ReminderAggregatorConfig, get_configured_reminder_types
+from .types import Finding, ReminderType
 
 
 class Scanner:
-    def __init__(self, scan_dir: Path, out_file: Path | None, out_format: str, ignore_file: Path | None = None) -> None:
-        self.scan_dir: Path = scan_dir
-        self.out_format: str = out_format
+    def __init__(self, config: ReminderAggregatorConfig) -> None:
+        self.config = config
 
-        if out_file is None:
-            extension_map = {
-                "json": "json",
-                "codeclimate": "json",
-                "junitxml": "xml",
-            }
-            self.out_file = Path(f"report.{extension_map[out_format]}")
-        else:
-            self.out_file = out_file
+    def scan(self) -> tuple[Finding, ...]:
+        findings: list[Finding] = []
 
-        self.ignore_spec: GitIgnoreSpec = self._load_ignorespec(ignore_file)
+        enabled_reminder_types: tuple[ReminderType, ...] = get_configured_reminder_types(self.config)
 
-        self.BASE_PATTERN: str = r"[\:\ ]*(TODO|FIXME|HACK|OPTIMIZE|REVIEW).*"
-
-        self.comment_patterns: dict[Pattern, Pattern] = {
-            re.compile(r".*\.(ya?ml|py|json|toml)$"): re.compile(f"#+{self.BASE_PATTERN}"),
-            re.compile(r".*\.html?$"): re.compile(f"(<!--){self.BASE_PATTERN}(-->)"),
-        }
-
-    def scan(self) -> None:
-        matches: list[dict[str, Any]] = []
-
-        for file in self.scan_dir.rglob("*"):
-            if not file.is_file():
-                continue
-
-            if self.ignore_spec.match_file(file):
-                continue
-
-            match: list[dict[str, Any]] = self._parse_file(file)
-
-            if len(match) == 0:
-                continue
-
-            matches.extend(match)
-
-        self.matches: list[dict[str, Any]] = matches
-
-    def create_report(self) -> None:
-        match self.out_format:
-            case "json":
-                self._create_json_report(self.out_file)
-            case "codeclimate":
-                self._create_codeclimate_report(self.out_file)
-            case "junitxml":
-                self._create_junitxml_report(self.out_file)
-            case _:
-                return
-
-    def _create_junitxml_report(self, out_file: Path) -> None:
-        testsuite = ET.Element("testsuite", name="ReminderAggregator", tests=str(len(self.matches)))
-
-        for match in self.matches:
-            testcase = ET.SubElement(testsuite, "testcase", classname=match["file"], name=f"Line {match['line']}")
-
-            failure = ET.SubElement(
-                testcase,
-                "failure",
-                message=f"Found {match['type']} tag",
-                type=match["type"],
+        for file_number, file in enumerate(self.config.path.rglob("*"), 1):
+            print(
+                f"""Processed {file_number} files.""",
+                end="\r",
             )
-            failure.text = match["comment"]
+            if not _is_file_parseable(file):
+                continue
 
-        tree = ET.ElementTree(testsuite)
-        tree.write(out_file, encoding="utf-8", xml_declaration=True)
+            findings.extend(get_findings_from_file(file, enabled_reminder_types))
 
-    def _create_json_report(self, out_file: Path) -> None:
-        counter = Counter(match["type"].upper() for match in self.matches)
-        summary = dict(counter)
-        summary["total"] = sum(counter.values())
+        return tuple(findings)
 
-        report = {
-            "summary": summary,
-            "details": self.matches,
-        }
 
-        with open(out_file, "w", encoding="utf-8") as file:
-            json.dump(report, file, indent=2)
+def _is_file_parseable(path: Path) -> bool:
+    if not path.exists():
+        return False
 
-    def _create_codeclimate_report(self, out_file: Path) -> None:
-        report: list[dict[str, Any]] = []
+    if not path.is_file():
+        return False
 
-        for match in self.matches:
-            comment_text = match["comment"].split(match["type"], 1)[-1].lstrip(":").strip()
-            description = f"Usage of {match['type']} tag"
-            fingetprint = md5(f"{match['file']}:{match['line']}:{match['type']}".encode()).hexdigest()
+    if path.stat().st_size == 0:
+        return False
 
-            report.append(
-                {
-                    "type": "issue",
-                    "check_name": match["type"].upper(),
-                    "description": description,
-                    "content": {
-                        "body": comment_text or match["comment"],
-                    },
-                    "categories": ["Style"],
-                    "location": {
-                        "path": match["file"],
-                        "lines": {
-                            "begin": match["line"],
-                        },
-                    },
-                    "severity": "info",
-                    "fingerprint": fingetprint,
-                }
+    return True
+
+
+def _process_comment_block(
+    comment_start_line: int | None,
+    comment_end_line: int | None,
+    finding_pattern: re.Pattern[str],
+    source: str,
+    file_path: Path,
+) -> list[Finding]:
+    findings: list[Finding] = []
+
+    if comment_start_line is None or comment_end_line is None:
+        return findings
+
+    lines = source.splitlines(keepends=True)
+
+    # Lines are 1-based, so convert to 0-based indexes.
+    content = "".join(lines[comment_start_line - 1 : comment_end_line])
+
+    for offset, line_content in enumerate(
+        content.splitlines(),
+        start=comment_start_line,
+    ):
+        for finding_type, _ in finding_pattern.findall(line_content):
+            findings.append(
+                Finding(
+                    line=offset,
+                    content=content,
+                    type=finding_type,
+                    file=str(file_path),
+                )
             )
 
-        with open(out_file, "w", encoding="utf-8") as file:
-            json.dump(report, file, indent=2)
+    return findings
 
-    def _parse_file(self, file_path: Path) -> list[dict[str, Any]]:
-        matches: list[dict[str, Any]] = []
-        cwd: Path = Path.cwd()
 
-        if file_path.is_relative_to(cwd):
-            display_path: Path = file_path.relative_to(cwd)
-        elif file_path.is_relative_to(self.scan_dir):
-            display_path: Path = file_path.relative_to(self.scan_dir)
+def get_findings_from_file(
+    file_path: Path,
+    reminder_types: tuple[ReminderType, ...],
+) -> list[Finding]:
+    findings: list[Finding] = []
+
+    try:
+        lexer: Lexer = get_lexer_for_filename(file_path)
+    except ValueError:
+        return findings
+
+    finding_pattern = re.compile(rf"\b({'|'.join(map(re.escape, reminder_types))})\b[:\s\-]*([^\n*\/]+)")
+
+    with open(file_path, encoding="utf-8", errors="ignore") as file:
+        source = file.read()
+
+    comment_start_line: int | None = None
+    comment_end_line: int | None = None
+
+    current_line = 1
+
+    for token_type, value in lexer.get_tokens(source):
+        if not (token_type == Comment or token_type.parent == Comment):
+            current_line += value.count("\n")
+            continue
+
+        token_start_line = current_line
+        token_end_line = current_line + value.count("\n")
+
+        if comment_start_line is None:
+            comment_start_line = token_start_line
+            comment_end_line = token_end_line
+
+        elif token_start_line == comment_end_line + 1:  # pyright: ignore[reportOptionalOperand]
+            # Consecutive comment line -> same block.
+            comment_end_line = token_end_line
+
         else:
-            display_path: Path = file_path
+            # There was a gap -> finish the previous block.
+            findings.extend(
+                _process_comment_block(comment_start_line, comment_end_line, finding_pattern, source, file_path)
+            )
 
-        comment_pattern: Pattern | None = self._get_comment_pattern(file_path)
+            comment_start_line = token_start_line
+            comment_end_line = token_end_line
 
-        if comment_pattern is None:
-            return matches
+        current_line += value.count("\n")
 
-        try:
-            for line_number, line in enumerate(open(file_path)):
-                line = line.strip()
+    findings.extend(_process_comment_block(comment_start_line, comment_end_line, finding_pattern, source, file_path))
 
-                if match := re.search(comment_pattern, line):
-                    matches.append(
-                        {
-                            "type": match.group(1),
-                            "file": str(display_path),
-                            "line": line_number + 1,
-                            "comment": line.strip(),
-                        }
-                    )
-
-        except UnicodeDecodeError:
-            print(f"Error reading {file_path}")
-
-        return matches
-
-    def _get_comment_pattern(self, file_path: Path) -> Pattern | None:
-        for file_pattern, comment_pattern in self.comment_patterns.items():
-            if file_pattern.match(str(file_path)):
-                return comment_pattern
-
-        return None
-
-    def _load_ignorespec(self, ignore_file: Path | None = None) -> GitIgnoreSpec:
-        DEFAULT_PATTERNS = [
-            ".git/",
-        ]
-
-        all_patterns = DEFAULT_PATTERNS.copy()
-
-        if ignore_file and ignore_file.is_file():
-            try:
-                extra_patterns: list[str] = ignore_file.read_text(encoding="utf-8").splitlines()
-                extra_patterns: list[str] = [p.strip() for p in extra_patterns]
-
-                all_patterns.extend(extra_patterns)
-            except (OSError, UnicodeDecodeError) as e:
-                print(f"Could not read ignore file {ignore_file}: {e}")
-
-        return GitIgnoreSpec.from_lines(all_patterns)
+    return findings
