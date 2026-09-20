@@ -3,7 +3,9 @@ from pathlib import Path
 
 import click
 
-from reminder_aggregator import scanner
+from .config import load_config
+from .report import generate_report
+from .scanner import Scanner
 
 
 def _get_terminal_width() -> int:
@@ -47,16 +49,13 @@ def cli(path: Path, out_file: Path | None, format: str, ignore_file: Path) -> No
     """
     # TODO: Add support for multiple output formats (junitxml, json, etc.)
 
-    file_scanner = scanner.Scanner(
-        scan_dir=Path(path),
-        out_file=Path(out_file) if out_file else None,
-        out_format=format,
-        ignore_file=Path(ignore_file),
-    )
+    config = load_config(None)
 
-    file_scanner.scan()
+    file_scanner = Scanner(config=config)
 
-    file_scanner.create_report()
+    findings = file_scanner.scan()
+
+    print(generate_report(config.report.format, findings))
 
 
 if __name__ == "__main__":
