@@ -75,6 +75,9 @@ wheels = [
 toml = [
     { name = "tomli-w" },
 ]
+yaml = [
+    { name = "pyyaml" },
+]
 
 [[package]]
 name = "nodeenv"
@@ -188,7 +191,7 @@ name = "reminder-aggregator"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
-    { name = "mashumaro", extra = ["toml"] },
+    { name = "mashumaro", extra = ["toml", "yaml"] },
     { name = "pathspec" },
     { name = "pygments" },
 ]
@@ -202,7 +205,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.0" },
-    { name = "mashumaro", extras = ["toml"], specifier = ">=3.22" },
+    { name = "mashumaro", extras = ["toml", "yaml"], specifier = ">=3.22" },
     { name = "pathspec", specifier = "==1.0.4" },
     { name = "pygments", specifier = ">=2.21.0" },
 ]
