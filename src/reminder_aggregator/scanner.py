@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+from pathspec import GitIgnoreSpec
 from pygments.lexer import Lexer
 from pygments.lexers import get_lexer_for_filename
 from pygments.token import Comment
@@ -16,13 +17,13 @@ class Scanner:
     def scan(self) -> tuple[Finding, ...]:
         findings: list[Finding] = []
 
+        ignore_spec: GitIgnoreSpec = _get_ignore_spec_from_file(self.config.ignore_file)
+
         enabled_reminder_types: tuple[ReminderType, ...] = get_configured_reminder_types(self.config)
 
-        for file_number, file in enumerate(self.config.scan_path.rglob("*"), 1):
-            print(
-                f"""Processed {file_number} files.""",
-                end="\r",
-            )
+        for file in self.config.scan_path.rglob("*"):
+            if ignore_spec.match_file(file):
+                continue
             if not _is_file_parseable(file):
                 continue
 
@@ -132,3 +133,17 @@ def get_findings_from_file(
     findings.extend(_process_comment_block(comment_start_line, comment_end_line, finding_pattern, source, file_path))
 
     return findings
+
+
+def _get_ignore_spec_from_file(ignore_file: Path) -> GitIgnoreSpec:
+    spec: GitIgnoreSpec = GitIgnoreSpec([])
+
+    try:
+        with open(ignore_file, encoding="utf-8", errors="ignore") as f:
+            lines: list[str] = f.readlines()
+
+            spec: GitIgnoreSpec = GitIgnoreSpec.from_lines(lines)
+    except OSError:
+        return spec
+
+    return spec
