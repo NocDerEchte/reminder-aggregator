@@ -20,6 +20,7 @@ CONTEXT_SETTINGS = {"max_content_width": _get_terminal_width()}
 
 
 @click.command("reminder-aggregator", short_help="Generate a report", context_settings=CONTEXT_SETTINGS)
+@click.version_option()
 @click.option(
     "--report-path",
     "-o",
