@@ -33,6 +33,7 @@ class ReminderAggregatorConfig:
     reminder: ReminderConfig = field(default_factory=ReminderConfig)
     report: ReportConfig = field(default_factory=ReportConfig)
     scan_path: Path = Path("./")
+    ignore_file: Path = Path(".gitignore")
 
 
 def _load_yaml_config(config_path: Path) -> ReminderAggregatorConfig:
@@ -95,13 +96,18 @@ def override_config_options(
     report_format: ReportFormat | None = None,
     report_path: Path | None = None,
     report_stdout: bool | None = True,
+    ignore_file: Path | None = None,
 ) -> ReminderAggregatorConfig:
     config_scan_path = config.scan_path
+    config_ignore_file = config.ignore_file
     config_reminder = config.reminder
     config_report = config.report
 
     if scan_path is not None:
         config_scan_path = scan_path
+
+    if ignore_file is not None:
+        config_ignore_file = ignore_file
 
     if reminder_use_default is not None:
         config_reminder = replace(config_reminder, use_default=reminder_use_default)
@@ -124,6 +130,7 @@ def override_config_options(
     return replace(
         config,
         scan_path=config_scan_path,
+        ignore_file=config_ignore_file,
         reminder=config_reminder,
         report=config_report,
     )

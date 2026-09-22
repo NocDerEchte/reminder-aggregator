@@ -41,9 +41,7 @@ CONTEXT_SETTINGS = {"max_content_width": _get_terminal_width()}
 )
 @click.option(
     "--ignore-file",
-    default=".gitignore",
-    show_default=True,
-    type=click.Path(exists=True),
+    type=Path,
     help="Specify ignore file to use",
 )
 @click.option(
@@ -88,6 +86,7 @@ def cli(
         reminder_enabled=reminder_enabled,
         reminder_disabled=reminder_disabled,
         report_stdout=report_stdout,
+        ignore_file=ignore_file,
     )
 
     file_scanner = Scanner(config)
