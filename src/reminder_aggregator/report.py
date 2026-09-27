@@ -49,7 +49,9 @@ def _generate_junitxml_report(findings: tuple[Finding, ...]) -> str:
     testsuite = ET.Element("testsuite", name="ReminderAggregator", tests=str(len(findings)))
 
     for finding in findings:
-        testcase = ET.SubElement(testsuite, "testcase", classname=finding.file, name=f"Line {finding.line}")
+        testcase = ET.SubElement(
+            testsuite, "testcase", file=finding.file, line=str(finding.line), name=str(finding.type)
+        )
 
         failure = ET.SubElement(
             testcase,
